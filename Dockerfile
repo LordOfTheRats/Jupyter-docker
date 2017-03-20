@@ -1,19 +1,12 @@
-FROM jupyter/base-notebook
+FROM jupyter/tensorflow-notebook
 
 USER root
 # install dependencies 
 RUN apt-get update && apt-get install -yq --no-install-recommends \
-    vim \
-    build-essential \
-    python-dev \
-    libsm6 \
-    pandoc \
-    libxrender1 \
-    inkscape \
     php5-cli php5-dev php-pear \
     pkg-config \
-    && apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    && apt-get clean
+#    rm -rf /var/lib/apt/lists/*
 
 # install zeromq and zmq php extension 
 RUN wget https://github.com/zeromq/zeromq4-1/releases/download/v4.1.5/zeromq-4.1.5.tar.gz && \
@@ -29,7 +22,41 @@ RUN wget https://getcomposer.org/installer -O composer-setup.php && \
     php composer-setup.php && \
     php ./jupyter-php-installer.phar -vvv install && \
     mv composer.phar /usr/local/bin/composer && \
-    rm -rf zeromq-* jupyter-php*
+    rm -rf zeromq-* jupyter-php* && \
+    rm composer-setup.php
+
+# install ijavascript
+RUN apt-get install -yq --no-install-recommends nodejs-legacy npm libzmq3-dev && \
+    npm install -g ijavascript && \
+    ijs --ijs-install=global
+
+#RUN cd .. && \
+#    apt-get install -yq --no-install-recommends cmake && \
+#    wget https://raw.githubusercontent.com/root-mirror/cling/master/tools/packaging/cpt.py && \
+#    chmod +x cpt.py && \
+#    ./cpt.py --check-requirements && ./cpt.py --create-dev-env Debug --with-workdir=./cling/
+
+RUN cd .. && \
+    wget https://root.cern.ch/download/cling/cling_2017-03-02_ubuntu14.tar.bz2 && \
+    tar -xvjf cling_2017-03-02_ubuntu14.tar.bz2 && \
+    rm cling_*.tar.bz2 && \
+    mv cling_* cling
+
+RUN cd .. && \
+    ln -s $(pwd)/cling/bin/* /usr/bin/ && \
+    cd cling/share/cling/Jupyter/kernel && \
+    pip install -e . && \
+    jupyter-kernelspec install cling-cpp17 && \
+    jupyter-kernelspec install cling-cpp14 && \
+    jupyter-kernelspec install cling-cpp11
 
 # Reset user from jupyter/base-notebook
 USER $NB_USER
+
+# install jupyter-bash
+RUN /opt/conda/bin/pip install --no-cache-dir bash_kernel
+RUN /opt/conda/bin/python -m bash_kernel.install
+
+# disable authentication
+RUN echo "" >> ~/.jupyter/jupyter_notebook_config.py
+RUN echo "c.NotebookApp.token = ''" >> ~/.jupyter/jupyter_notebook_config.py
