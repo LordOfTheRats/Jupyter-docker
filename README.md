@@ -1,26 +1,23 @@
-# Jupyter Notebook with Python3 and PHP kernel 
+# Jupyter Notebook with Tensorflow-Stack, PHP kernel, JavaScript kernel, C++ kernel and Bash kernel 
 
 ## What it Gives You
 
-* Minimally-functional Jupyter Notebook 4.2.x (e.g., no pandoc for document conversion)
-* Python3 and PHP kernel
-* Miniconda Python 3.x
-* No preinstalled scientific computing packages
-* Unprivileged user `jovyan` (uid=1000, configurable, see options) in group `users` (gid=100) with ownership over `/home/jovyan` and `/opt/conda`
-* [tini](https://github.com/krallin/tini) as the container entrypoint and [start-notebook.sh](./start-notebook.sh) as the default command
-* A [start-singleuser.sh](./start-singleuser.sh) script useful for running a single-user instance of the Notebook server, as required by JupyterHub
-* A [start.sh](./start.sh) script useful for running alternative commands in the container (e.g. `ipython`, `jupyter kernelgateway`, `jupyter lab`)
-* Options for HTTPS, password auth, and passwordless `sudo`
+* Everything in [Tensorflow Notebook](https://github.com/jupyter/docker-stacks/edit/master/tensorflow-notebook)
+* PHP kernel
+* iJavascript kernel
+* Cling kernel
+* Bash kernel
+* Disabled authentication (INSECURE!)
 
 ## Basic Use
 
 The following commands starts a container with the Notebook server listening for HTTP connections on port 8888 without authentication configured.
 
 ```
-git clone https://github.com/sawantuday/jupyter-php.git
-cd jupyter-php
-docker build -t jupyter-php .
-docker run -d -p 8888:8888 jupyter-php
+git clone https://github.com/LordOfTheRats/Jupyter-docker.git
+cd jupyter-docker
+docker build -t jupyter-docker .
+docker run -d -p 8888:8888 jupyter-docker
 ```
 
 ## Notebook Options
@@ -30,13 +27,13 @@ The Docker container executes a [`start-notebook.sh` script](./start-notebook.sh
 You can pass [Jupyter command line options](http://jupyter.readthedocs.org/en/latest/config.html#command-line-arguments) through the `start-notebook.sh` script when launching the container. For example, to secure the Notebook server with a password hashed using `IPython.lib.passwd()`, run the following:
 
 ```
-docker run -d -p 8888:8888 jupyter-php start-notebook.sh --NotebookApp.password='sha1:74ba40f8a388:c913541b7ee99d15d5ed31d4226bf7838f83a50e'
+docker run -d -p 8888:8888 jupyter-docker start-notebook.sh --NotebookApp.password='sha1:74ba40f8a388:c913541b7ee99d15d5ed31d4226bf7838f83a50e'
 ```
 
 For example, to set the base URL of the notebook server, run the following:
 
 ```
-docker run -d -p 8888:8888 jupyter-php start-notebook.sh --NotebookApp.base_url=/some/path
+docker run -d -p 8888:8888 jupyter-docker start-notebook.sh --NotebookApp.base_url=/some/path
 ```
 
 You can sidestep the `start-notebook.sh` script and run your own commands in the container. See the *Alternative Commands* section later in this document for more information.
