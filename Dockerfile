@@ -50,7 +50,8 @@ RUN cd .. && \
     jupyter-kernelspec install cling-cpp14 && \
     jupyter-kernelspec install cling-cpp11
 
-RUN chown -R $NB_USER /home/$NB_USER
+RUN chown -R $NB_USER /home/$NB_USER && \
+    rm -rf /home/$NB_USER/.local/share/jupyter
 
 # Reset user from jupyter/base-notebook
 USER $NB_USER
