@@ -3,7 +3,7 @@ FROM jupyter/tensorflow-notebook
 USER root
 # install dependencies 
 RUN apt-get update && apt-get install -yq --no-install-recommends \
-    php5-cli php5-dev php-pear \
+    php-cli php-dev php-pear \
     pkg-config \
     && apt-get clean
 #    rm -rf /var/lib/apt/lists/*
@@ -14,7 +14,7 @@ RUN wget https://github.com/zeromq/zeromq4-1/releases/download/v4.1.5/zeromq-4.1
     cd zeromq-* && \
     ./configure && make && make install && \
     printf "\n" | pecl install zmq-beta && \
-    echo "extension=zmq.so" > /etc/php5/cli/conf.d/zmq.ini
+    echo "extension=zmq.so" > /etc/php/7.0/cli/conf.d/zmq.ini
 
 # install PHP composer
 RUN wget https://getcomposer.org/installer -O composer-setup.php && \
@@ -37,8 +37,8 @@ RUN apt-get install -yq --no-install-recommends nodejs-legacy npm libzmq3-dev &&
 #    ./cpt.py --check-requirements && ./cpt.py --create-dev-env Debug --with-workdir=./cling/
 
 RUN cd .. && \
-    wget https://root.cern.ch/download/cling/cling_2017-03-02_ubuntu14.tar.bz2 && \
-    tar -xvjf cling_2017-03-02_ubuntu14.tar.bz2 && \
+    wget https://root.cern.ch/download/cling/cling_2017-09-15_ubuntu16.tar.bz2 && \
+    tar -xvjf cling_2017-09-15_ubuntu16.tar.bz2 && \
     rm cling_*.tar.bz2 && \
     mv cling_* cling
 
@@ -53,6 +53,9 @@ RUN cd .. && \
 RUN chown -R $NB_USER /home/$NB_USER && \
     rm -rf /home/$NB_USER/.local/share/jupyter
 
+# install java jre for h2o
+RUN apt-get install -yq openjdk-8-jre
+
 # Reset user from jupyter/base-notebook
 USER $NB_USER
 
@@ -60,6 +63,11 @@ USER $NB_USER
 RUN /opt/conda/bin/pip install --no-cache-dir bash_kernel
 RUN /opt/conda/bin/python -m bash_kernel.install
 
+# install h2o
+RUN /opt/conda/bin/pip install --no-cache-dir --upgrade h2o && \
+    /opt/conda/bin/pip install --no-cache-dir --upgrade pandas
+
 # disable authentication
+RUN mkdir -p .jupyter
 RUN echo "" >> ~/.jupyter/jupyter_notebook_config.py
 RUN echo "c.NotebookApp.token = ''" >> ~/.jupyter/jupyter_notebook_config.py
